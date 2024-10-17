@@ -15,4 +15,4 @@ jobs:
       - uses: actions/add-to-project@v1.0.2
         with:
           project-url: https://github.com/users/tedmanlacy/projects/1
-          github-token: ${{ secrets.OH_SECRET_NAME}}
+          github-token: ${{ secrets.GITHUB_TOKEN}}
