@@ -13,15 +13,23 @@ Resources:
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash
+          # Update the package index
           yum update -y
-          yum install -y git
-          yum install -y docker
-          service docker start
-          usermod -a -G docker ec2-user
-          git clone https://github.com/tedmanlacy/smartStructsAPI.git /home/ec2-user/smartStructsAPI
-          cd /home/ec2-user/smartStructsAPI
-          docker build -t smartstructsapi .
-          docker run -d -p 80:80 smartstructsapi
+          
+          # Install Git, Python3, and pip
+          yum install -y git python3 python3-pip
+          
+          # Clone the specific branch from the GitHub repository
+          git clone -b Updates_for_OH --single-branch https://github.com/tedmanlacy/smartStructsAPI.git /home/ec2-user/myfastapiapp
+          
+          # Navigate to the application directory
+          cd /home/ec2-user/myfastapiapp
+          
+          # Install the required Python packages
+          pip3 install -r requirements.txt
+          
+          # Start the FastAPI app with Uvicorn
+          nohup uvicorn main:app --host 0.0.0.0 --port 80 &
 
   InstanceSecurityGroup:
     Type: 'AWS::EC2::SecurityGroup'
