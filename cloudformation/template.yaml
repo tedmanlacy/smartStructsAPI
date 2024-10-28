@@ -2,6 +2,33 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: CloudFormation Template to deploy smartStructsAPI to an EC2 instance
 
 Resources:
+  MyInstanceProfile:
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      Roles:
+        - Ref: MyRole
+
+  MyRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: 'ec2.amazonaws.com'
+            Action: 'sts:AssumeRole'
+      Policies:
+        - PolicyName: 'CloudWatchLogsPolicy'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'logs:CreateLogGroup'
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                Resource: '*'
   EC2Instance:
     Type: 'AWS::EC2::Instance'
     Properties:
@@ -28,18 +55,18 @@ Resources:
           # Install the required Python packages
           pip3 install -r requirements.txt
           
-          # Configure CloudWatch Logs agent
-          cat <<EOF >> /etc/awslogs/awslogs.conf
+          yum install -y awslogs
+          cat <<EOF > /etc/awslogs/awslogs.conf
           [general]
           state_file = /var/lib/awslogs/agent-state
 
-          [/var/log/myfastapiapp.log]
-          file = /var/log/myfastapiapp.log
-          log_group_name = my-log-group
-          log_stream_name = {instance_id}
+          [/var/log/messages]
+          file = /var/log/messages
+          log_group_name = MyEC2LogGroup
+          log_stream_name = {instance_id}/messages
           datetime_format = %b %d %H:%M:%S
           EOF
-          
+
           service awslogs start
           chkconfig awslogs on
           
