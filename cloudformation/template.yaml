@@ -59,7 +59,7 @@ Resources:
           FromPort: 80
           ToPort: 80
           CidrIp: 0.0.0.0/0
-InstanceLogGroup:
+  MyLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: my-log-group
