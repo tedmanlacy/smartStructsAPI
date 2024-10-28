@@ -28,9 +28,24 @@ Resources:
           # Install the required Python packages
           pip3 install -r requirements.txt
           
-          # Start the FastAPI app with Uvicorn
-          nohup uvicorn main:app --host 0.0.0.0 --port 80 &
+          # Configure CloudWatch Logs agent
+          cat <<EOF >> /etc/awslogs/awslogs.conf
+          [general]
+          state_file = /var/lib/awslogs/agent-state
 
+          [/var/log/myfastapiapp.log]
+          file = /var/log/myfastapiapp.log
+          log_group_name = my-log-group
+          log_stream_name = {instance_id}
+          datetime_format = %b %d %H:%M:%S
+          EOF
+          
+          service awslogs start
+          chkconfig awslogs on
+          
+          # Start the FastAPI app with Uvicorn and log output
+          nohup uvicorn main:app --host 0.0.0.0 --port 80 > /var/log/myfastapiapp.log 2>&1 &
+  
   InstanceSecurityGroup:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
@@ -44,7 +59,11 @@ Resources:
           FromPort: 80
           ToPort: 80
           CidrIp: 0.0.0.0/0
-
+InstanceLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: my-log-group
+      RetentionInDays: 7
 Outputs:
   InstanceId:
     Description: The Instance ID
