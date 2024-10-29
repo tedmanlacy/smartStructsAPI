@@ -53,7 +53,9 @@ Resources:
           cd /home/ec2-user/myfastapiapp
           
           # Install the required Python packages
-          pip3 install -r requirements.txt
+          pip install -r requirements.txt
+          pip install uvicorn
+          pip install fastapi   
           
           yum install -y awslogs
           cat <<EOF > /etc/awslogs/awslogs.conf
