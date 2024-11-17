@@ -13,5 +13,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of the application code into the container
 COPY . .
 
-# Command to run the FastAPI application using Uvicorn
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]
+# Copy the start script into the container
+COPY start.sh .
+
+# Make the start script executable
+RUN chmod +x start.sh
+
+# Command to run the start script
+CMD ["./start.sh"]
