@@ -57,6 +57,12 @@ Resources:
           # Navigate to the application directory
           cd /home/ec2-user/myfastapiapp
           
+          # Build the Docker image
+          docker build -t my-fastapi-app .
+          
+          # Run the Docker container
+          docker run -d -p 80:80 my-fastapi-app
+
           # Install CloudWatch Logs agent
           yum install -y awslogs
           cat <<EOF > /etc/awslogs/awslogs.conf
