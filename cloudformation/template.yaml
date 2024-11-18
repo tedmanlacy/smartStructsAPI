@@ -43,8 +43,13 @@ Resources:
           # Update the package index
           yum update -y
           
-          # Install Git, Python3, and pip
-          yum install -y git python3 python3-pip
+          # Install Docker
+          amazon-linux-extras install docker -y
+          service docker start
+          usermod -a -G docker ec2-user
+          
+          # Install Git
+          yum install -y git
           
           # Clone the specific branch from the GitHub repository
           git clone -b Updates_for_OH --single-branch https://github.com/tedmanlacy/smartStructsAPI.git /home/ec2-user/myfastapiapp
@@ -52,28 +57,21 @@ Resources:
           # Navigate to the application directory
           cd /home/ec2-user/myfastapiapp
           
-          # Install the required Python packages
-          pip install -r requirements.txt
-          pip install uvicorn
-          pip install fastapi   
+          # Build the Docker image
+          docker build -t my-fastapi-app .
           
+          # Run the Docker container
+          docker run -d -p 80:80 my-fastapi-app
+          
+          # Install CloudWatch Logs agent
           yum install -y awslogs
           cat <<EOF > /etc/awslogs/awslogs.conf
           [general]
           state_file = /var/lib/awslogs/agent-state
-
-          [/var/log/messages]
-          file = /var/log/messages
-          log_group_name = my-log-group
-          log_stream_name = {instance_id}/messages
-          datetime_format = %b %d %H:%M:%S
           EOF
-
+          
           service awslogs start
           chkconfig awslogs on
-          
-          # Start the FastAPI app with Uvicorn and log output
-          nohup uvicorn main:app --host 0.0.0.0 --port 80 > /var/log/myfastapiapp.log 2>&1 &
   
   InstanceSecurityGroup:
     Type: 'AWS::EC2::SecurityGroup'
